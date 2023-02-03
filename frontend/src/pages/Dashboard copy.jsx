@@ -16,6 +16,7 @@ function Dashboard() {
   )
 
   useEffect(() => {
+    console.log(user);
     if (isError) {
       console.log(message)
     }

@@ -25,7 +25,7 @@ function Login() {
     if (isError) {
       toast.error(message)
     }
-
+    console.log(isSuccess);
     if (isSuccess || user) {
       navigate('/')
     }
