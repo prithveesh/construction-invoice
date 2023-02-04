@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { set, get } from './service';
+import { MOCK } from './mock';
 
 const initialState = {
-  invoice: null,
+  invoice: MOCK,
   isError: false,
   isSuccess: false,
   isLoading: false,
@@ -66,7 +67,8 @@ export const getInvoice = createAsyncThunk(
     try {
       // const token = thunkAPI.getState().auth.user.token;
       // return await get(id, token);
-      return await get(id);
+      // return await get(id);
+      return MOCK;
     } catch (error) {
       const message =
         (error.response &&

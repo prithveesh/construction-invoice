@@ -6,8 +6,11 @@ const cors = require('cors');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const connectDB = require('./config/db');
 const port = process.env.PORT || 8080;
+console.log('############### new');
 
 connectDB();
+
+console.log('############### connected');
 
 const app = express();
 app.use(cors());

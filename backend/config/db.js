@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
+    console.log(
+      'mongodb+srv://prithveesh:0Ccdi4G4uTBIfC4O@cluster0.bl76y.gcp.mongodb.net/?retryWrites=true&w=majority',
+    );
     const conn = await mongoose.connect(
       'mongodb+srv://prithveesh:0Ccdi4G4uTBIfC4O@cluster0.bl76y.gcp.mongodb.net/?retryWrites=true&w=majority',
     );
+    console.log('done');
 
     console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline);
   } catch (error) {
