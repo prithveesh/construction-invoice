@@ -8,8 +8,8 @@ const config = {
   },
 };
 
-const baseUrl = 'https://construction-invoice-ztcwqntjcq-ue.a.run.app';
-// const baseUrl = 'http://localhost:8100';
+// const baseUrl = 'https://construction-invoice-ztcwqntjcq-ue.a.run.app';
+const baseUrl = 'http://localhost:8100';
 
 export const makePost = async (url, data, headers) => {
   const response = await fetch(baseUrl + url, {

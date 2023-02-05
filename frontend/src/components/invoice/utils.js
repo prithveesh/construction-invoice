@@ -6,6 +6,7 @@ export const round = (value) => {
 
 export const calStartDate = (d) => {
   const date = new Date(d);
+  d.setHours(0, 0, 0, 0);
   date.setDate(date.getDate() - date.getDay() + 1);
   return date;
 };

@@ -7,67 +7,56 @@ export const MOCK = {
     },
     tax: {
       material: 0.06,
-      labor: 0.06,
+      labor: 0,
     },
   },
-  days: {
+  labor: {
     0: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 1,
+      hoursWorked: 1,
+      ownerHours: 0,
     },
     1: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 0,
+      hoursWorked: 0,
+      ownerHours: 0,
     },
     2: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 0,
+      hoursWorked: 0,
+      ownerHours: 0,
     },
     3: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 0,
+      hoursWorked: 0,
+      ownerHours: 0,
     },
     4: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 0,
+      hoursWorked: 0,
+      ownerHours: 0,
     },
     5: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 0,
+      hoursWorked: 0,
+      ownerHours: 0,
     },
     6: {
-      labor: {
-        noOfWorkers: 0,
-        hoursWorked: 0,
-        ownerHours: 0,
-      },
-      material: [],
+      noOfWorkers: 0,
+      hoursWorked: 0,
+      ownerHours: 0,
     },
   },
+  material: [
+    {
+      date: '02/07/2023',
+      receipt: 'receipt 1',
+      storeName: 'store',
+      item: 'item',
+      price: 1,
+      type: 'consumable',
+    },
+  ],
   id: '2202',
   paid: 0,
 };

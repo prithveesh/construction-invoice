@@ -3,7 +3,9 @@ import { set, get } from './service';
 import { MOCK } from './mock';
 
 const initialState = {
-  invoice: MOCK,
+  invoice: null, // MOCK,
+  laborPrices: {},
+  materialPrices: {},
   isError: false,
   isSuccess: false,
   isLoading: false,
@@ -40,7 +42,6 @@ export const updateInvoice = createAsyncThunk(
   async ({ index, data }, thunkAPI) => {
     try {
       const { invoice } = thunkAPI.getState().invoice;
-      console.log('invoice from update', invoice);
       return {
         ...invoice,
         days: {
@@ -60,6 +61,83 @@ export const updateInvoice = createAsyncThunk(
   },
 );
 
+// Update invoice
+export const updateMaterial = createAsyncThunk(
+  'invoice/updateMaterial',
+  async (material, thunkAPI) => {
+    try {
+      const { invoice } = thunkAPI.getState().invoice;
+      return {
+        ...invoice,
+        material,
+      };
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  },
+);
+// Update invoice
+export const updateLabors = createAsyncThunk(
+  'invoice/updateLabors',
+  async (labor, thunkAPI) => {
+    try {
+      const { invoice } = thunkAPI.getState().invoice;
+      return {
+        ...invoice,
+        labor: { ...labor },
+      };
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  },
+);
+// Update invoice
+export const updateMaterialPrices = createAsyncThunk(
+  'invoice/updateMaterialPrices',
+  async (prices, thunkAPI) => {
+    try {
+      return prices;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
+export const updateLaborPrices = createAsyncThunk(
+  'invoice/updateLaborPrices',
+  async (prices, thunkAPI) => {
+    try {
+      return prices;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
 // Get user invoice
 export const getInvoice = createAsyncThunk(
   'invoice/getAll',
@@ -67,8 +145,8 @@ export const getInvoice = createAsyncThunk(
     try {
       // const token = thunkAPI.getState().auth.user.token;
       // return await get(id, token);
-      // return await get(id);
-      return MOCK;
+      // return MOCK;
+      return await get(id);
     } catch (error) {
       const message =
         (error.response &&
@@ -117,6 +195,26 @@ export const invoiceSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
+      })
+      .addCase(updateMaterial.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.invoice = action.payload;
+      })
+      .addCase(updateLabors.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.invoice = action.payload;
+      })
+      .addCase(updateMaterialPrices.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.materialPrices = action.payload;
+      })
+      .addCase(updateLaborPrices.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.laborPrices = action.payload;
       });
   },
 });

@@ -1,31 +1,27 @@
 const mongoose = require('mongoose');
 
-const DaySchema = mongoose.Schema({
-  labor: {
-    day: Number,
-    noOfWorkers: {
-      type: Number,
-      default: 0,
-    },
-    hoursWorked: {
-      type: Number,
-      default: 0,
-    },
-    ownerHours: {
-      type: Number,
-      default: 0,
-    },
+const LaborSchema = mongoose.Schema({
+  noOfWorkers: {
+    type: Number,
+    default: 0,
   },
-  material: [
-    {
-      item: {
-        type: String,
-      },
-      price: {
-        type: Number,
-      },
-    },
-  ],
+  hoursWorked: {
+    type: Number,
+    default: 0,
+  },
+  ownerHours: {
+    type: Number,
+    default: 0,
+  },
+});
+
+const MaterialSchema = mongoose.Schema({
+  date: String,
+  receipt: String,
+  storeName: String,
+  item: String,
+  price: Number,
+  type: String,
 });
 
 const invoiceSchema = mongoose.Schema(
@@ -65,15 +61,16 @@ const invoiceSchema = mongoose.Schema(
         },
       },
     },
-    days: {
-      0: DaySchema,
-      1: DaySchema,
-      2: DaySchema,
-      3: DaySchema,
-      4: DaySchema,
-      5: DaySchema,
-      6: DaySchema,
+    labor: {
+      0: LaborSchema,
+      1: LaborSchema,
+      2: LaborSchema,
+      3: LaborSchema,
+      4: LaborSchema,
+      5: LaborSchema,
+      6: LaborSchema,
     },
+    material: [MaterialSchema],
     paid: {
       type: Number,
     },

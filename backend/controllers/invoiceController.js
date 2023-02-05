@@ -4,7 +4,7 @@ const Invoice = require('../models/invoiceModal');
 // const User = require('../models/userModel')
 
 const createInvoice = async (id) => {
-  return await Invoice.create({
+  const invoice = {
     config: {
       commission: 0.25,
       rates: {
@@ -13,70 +13,52 @@ const createInvoice = async (id) => {
       },
       tax: {
         material: 0.06,
-        labor: 0.06,
+        labor: 0,
       },
     },
-    days: {
+    labor: {
       0: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
       1: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
       2: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
       3: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
       4: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
       5: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
       6: {
-        labor: {
-          noOfWorkers: 0,
-          hoursWorked: 0,
-          ownerHours: 0,
-        },
-        material: [],
+        noOfWorkers: 0,
+        hoursWorked: 0,
+        ownerHours: 0,
       },
     },
+    material: [],
     id,
     paid: 0,
-  });
+  };
+  console.log(invoice);
+  return await Invoice.create(invoice);
 };
 
 const findInvoice = async (id) => {
@@ -87,8 +69,9 @@ const findInvoice = async (id) => {
 // @route   GET /api/invoice
 // @access  Private
 const getInvoice = asyncHandler(async (req, res) => {
-  console.log('req.params.id: ', req.params.id);
+  console.log('req.params.id #: ', req.params.id);
   let invoice = await findInvoice(req.params.id);
+  console.log('invoice: ', invoice);
   if (!invoice) {
     invoice = await createInvoice(req.params.id);
   }
