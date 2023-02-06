@@ -87,7 +87,7 @@ function Invoice() {
               <TableCell align="center">Labor Total</TableCell>
               <TableCell align="center">Material Cost</TableCell>
               <TableCell align="center">Material Commission</TableCell>
-              <TableCell align="center">Material Tax</TableCell>
+              {/* <TableCell align="center">Material Tax</TableCell> */}
               <TableCell align="center">Material Total</TableCell>
               <TableCell align="center">Total Comission</TableCell>
               <TableCell align="center">Total Cost</TableCell>
@@ -100,7 +100,7 @@ function Invoice() {
               <TableCell align="center">${laborPrices.total}</TableCell>
               <TableCell align="center">${materialPrices.cost}</TableCell>
               <TableCell align="center">${materialPrices.commission}</TableCell>
-              <TableCell align="center">${materialPrices.tax}</TableCell>
+              {/* <TableCell align="center">${materialPrices.tax}</TableCell> */}
               <TableCell align="center">${materialPrices.total}</TableCell>
               <TableCell align="center">
                 ${laborPrices.commission + materialPrices.commission}

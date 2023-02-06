@@ -29,8 +29,8 @@ const MaterialItem = ({
   tax,
   children,
 }) => {
-  const itemTax = round(item.price * tax);
-  const itemTotal = itemTax + item.price;
+  // const itemTax = round(item.price * tax);
+  // const itemTotal = itemTax + item.price;
   const shouldDisableDate = useCallback(
     (date) => {
       return (
@@ -105,12 +105,12 @@ const MaterialItem = ({
           value={item.price}
         />
       </TableCell>
-      <TableCell align="center">
+      {/* <TableCell align="center">
         <Field preText={'$'} isReadOnly={true} value={itemTax} />
       </TableCell>
       <TableCell align="center">
         <Field preText={'$'} isReadOnly={true} value={itemTotal} />
-      </TableCell>
+      </TableCell> */}
       {children}
     </TableRow>
   );
@@ -140,8 +140,8 @@ const Material = ({ date, isReadOnly = false }) => {
   const [newItem, setNewItem] = useState({ ...BlankMaterialItem, date });
   const totalItemCost = material.reduce((sum, item) => sum + item.price, 0);
   const totalCommission = round(totalItemCost * commission);
-  const totalTax = round(totalItemCost * tax);
-  const totalCost = totalItemCost + totalTax + totalCommission;
+  // const totalTax = round(totalItemCost * tax);
+  const totalCost = totalItemCost + totalCommission; // + totalTax;
 
   const onChange = useCallback(
     (event, dataKey, index) => {
@@ -170,7 +170,12 @@ const Material = ({ date, isReadOnly = false }) => {
   const onAdd = useCallback(() => {
     const updatedMaterial = [...material, newItem];
     dispatch(updateMaterial(updatedMaterial));
-    setNewItem({ ...BlankMaterialItem, date: new Date(newItem.date) });
+    setNewItem({
+      ...BlankMaterialItem,
+      date: new Date(newItem.date),
+      receipt: newItem.receipt,
+      storeName: newItem.storeName,
+    });
   }, [dispatch, material, newItem]);
 
   const onRemove = useCallback(
@@ -188,12 +193,12 @@ const Material = ({ date, isReadOnly = false }) => {
     dispatch(
       updateMaterialPrices({
         cost: totalItemCost,
-        tax: totalTax,
+        // tax: totalTax,
         commission: totalCommission,
         total: totalCost,
       }),
     );
-  }, [totalCommission, dispatch, totalCost, totalTax, totalItemCost]);
+  }, [totalCommission, dispatch, totalItemCost, totalCost]);
 
   return (
     <>
@@ -209,8 +214,8 @@ const Material = ({ date, isReadOnly = false }) => {
               <TableCell align="center">Store Name</TableCell>
               <TableCell align="center">Item</TableCell>
               <TableCell align="center">Item Price (in $)</TableCell>
-              <TableCell align="center">Tax</TableCell>
-              <TableCell align="center">Cost</TableCell>
+              {/* <TableCell align="center">Tax</TableCell>
+              <TableCell align="center">Cost</TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -221,7 +226,7 @@ const Material = ({ date, isReadOnly = false }) => {
                   index={index}
                   isReadOnly={isReadOnly}
                   onChange={onChange}
-                  tax={tax}
+                  // tax={tax}
                   startDate={date}
                 >
                   <Button
@@ -243,7 +248,7 @@ const Material = ({ date, isReadOnly = false }) => {
               index={material.length}
               isReadOnly={isReadOnly}
               onChange={onNewItemChange}
-              tax={tax}
+              // tax={tax}
               startDate={date}
             >
               <Button
@@ -254,6 +259,15 @@ const Material = ({ date, isReadOnly = false }) => {
                 Add
               </Button>
             </MaterialItem>
+            <TableRow>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center">Total</TableCell>
+              <TableCell align="center">$ {totalItemCost}</TableCell>
+              {/* <TableCell align="center">Tax</TableCell>
+              <TableCell align="center">Cost</TableCell> */}
+            </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
