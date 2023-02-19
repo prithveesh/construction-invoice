@@ -16,3 +16,5 @@ export const getOffsetDate = (date, offset) => {
   d.setDate(d.getDate() + offset);
   return d;
 };
+
+export const getId = () => Math.floor(Math.random() * 1000000);

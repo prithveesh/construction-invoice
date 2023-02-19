@@ -10,9 +10,14 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { getOffsetDate, round } from '../utils';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { getOffsetDate, round, getId } from '../utils';
 import Totals from '../totals';
 import Field from '../Field';
 import {
@@ -20,6 +25,29 @@ import {
   updateMaterialPrices,
 } from '../../../features/invoice/slice';
 
+export function Receipts({ receipts, setReceipt, receipt = '' }) {
+  const handleChange = useCallback(
+    (event) => {
+      setReceipt(event.target.value);
+    },
+    [setReceipt],
+  );
+  return (
+    <Box sx={{ minWidth: 120 }}>
+      <FormControl fullWidth>
+        <InputLabel>Receipt</InputLabel>
+        <Select value={receipt} label="Receipt" onChange={handleChange}>
+          <MenuItem value={''}>None</MenuItem>
+          {Array.from(receipts).map((value) => (
+            <MenuItem key={value} value={value}>
+              {value}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  );
+}
 const MaterialItem = ({
   startDate,
   item,
@@ -48,18 +76,26 @@ const MaterialItem = ({
           '& input': { maxWidth: '100px', padding: '3px 10px' },
         }}
       >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            shouldDisableDate={shouldDisableDate}
-            label=""
-            openTo="day"
-            value={item.date}
-            onChange={(newValue) => {
-              onChange({ target: { value: newValue.toDate() } }, 'date', index);
-            }}
-            renderInput={(params) => <TextField {...params} />}
-          />
-        </LocalizationProvider>
+        {isReadOnly ? (
+          new Date(item.date).toDateString()
+        ) : (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              shouldDisableDate={shouldDisableDate}
+              label=""
+              openTo="day"
+              value={new Date(item.date)}
+              onChange={(newValue) => {
+                onChange(
+                  { target: { value: newValue.toDate().toDateString() } },
+                  'date',
+                  index,
+                );
+              }}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+        )}
       </TableCell>
       <TableCell align="center">
         <Field
@@ -70,6 +106,7 @@ const MaterialItem = ({
           onChange={onChange}
           id={`${index}-receipt`}
           value={item.receipt}
+          width="120px"
         />
       </TableCell>
       <TableCell align="center">
@@ -103,6 +140,7 @@ const MaterialItem = ({
           onChange={onChange}
           id={`${index}-price`}
           value={item.price}
+          width="100px"
         />
       </TableCell>
       {/* <TableCell align="center">
@@ -111,7 +149,7 @@ const MaterialItem = ({
       <TableCell align="center">
         <Field preText={'$'} isReadOnly={true} value={itemTotal} />
       </TableCell> */}
-      {children}
+      {!isReadOnly && children}
     </TableRow>
   );
 };
@@ -129,29 +167,46 @@ const Material = ({ date, isReadOnly = false }) => {
   const {
     invoice: {
       material,
-      config: {
-        commission,
-        tax: { material: tax },
-      },
+      config: { commission },
     },
   } = useSelector((state) => state.invoice);
   const dispatch = useDispatch();
-
-  const [newItem, setNewItem] = useState({ ...BlankMaterialItem, date });
-  const totalItemCost = material.reduce((sum, item) => sum + item.price, 0);
+  const [receipts, setReceipts] = useState(
+    () => new Set(material.map((m) => m.receipt)),
+  );
+  const [receipt, setReceipt] = useState('');
+  const [newItem, setNewItem] = useState({
+    ...BlankMaterialItem,
+    date: date.toDateString(),
+  });
+  const totalItemCost = material.reduce(
+    (sum, item) => (item.item.toLowerCase() !== 'tax' ? sum + item.price : sum),
+    0,
+  );
   const totalCommission = round(totalItemCost * commission);
-  // const totalTax = round(totalItemCost * tax);
+  const totalTax = material.reduce(
+    (sum, item) => (item.item.toLowerCase() === 'tax' ? sum + item.price : sum),
+    0,
+  );
   const totalCost = totalItemCost + totalCommission; // + totalTax;
 
   const onChange = useCallback(
-    (event, dataKey, index) => {
+    (event, dataKey, itemId) => {
       let { value, type } = event.target;
       if (type === 'number') value = +value;
+      const index = material.findIndex((item) => item.itemId === itemId);
       const updatedMaterial = [...material];
       updatedMaterial[index] = {
+        itemId: getId(),
         ...updatedMaterial[index],
         [dataKey]: value,
       };
+      if (dataKey === 'receipt') {
+        setReceipts((value) => {
+          value.add(updatedMaterial[index].receipt);
+          return value;
+        });
+      }
       dispatch(updateMaterial(updatedMaterial));
     },
     [dispatch, material],
@@ -168,42 +223,60 @@ const Material = ({ date, isReadOnly = false }) => {
   );
 
   const onAdd = useCallback(() => {
-    const updatedMaterial = [...material, newItem];
+    const updatedMaterial = [...material, { itemId: getId(), ...newItem }];
     dispatch(updateMaterial(updatedMaterial));
     setNewItem({
       ...BlankMaterialItem,
-      date: new Date(newItem.date),
+      date: newItem.date,
       receipt: newItem.receipt,
       storeName: newItem.storeName,
     });
-  }, [dispatch, material, newItem]);
+    setReceipts((value) => {
+      value.add(newItem.receipt);
+      return value;
+    });
+    if (receipt !== newItem.receipt) setReceipt('');
+  }, [dispatch, material, newItem, receipt]);
 
   const onRemove = useCallback(
-    (index) => {
+    (itemId) => {
+      const index = material.findIndex((item) => item.itemId === itemId);
       const updatedMaterial = [...material];
       updatedMaterial.splice(index, 1);
       dispatch(updateMaterial(updatedMaterial));
-      setNewItem({ ...BlankMaterialItem });
     },
     [dispatch, material],
   );
 
   useEffect(() => {
-    console.log('trigger');
     dispatch(
       updateMaterialPrices({
-        cost: totalItemCost,
-        // tax: totalTax,
-        commission: totalCommission,
-        total: totalCost,
+        cost: round(totalItemCost),
+        tax: totalTax,
+        commission: round(totalCommission),
+        total: round(totalCost),
       }),
     );
-  }, [totalCommission, dispatch, totalItemCost, totalCost]);
-
+  }, [totalCommission, dispatch, totalItemCost, totalCost, totalTax]);
+  let sum = 0;
+  let tax = 0;
   return (
     <>
-      <Typography variant="h6" align="left">
-        Material
+      <Typography
+        variant="h6"
+        align="left"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <span>Material</span>
+        <Receipts
+          setReceipt={setReceipt}
+          receipt={receipt}
+          receipts={receipts}
+        />
       </Typography>
       <TableContainer>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
@@ -219,52 +292,79 @@ const Material = ({ date, isReadOnly = false }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {material.map((item, index) => (
-              <>
-                <MaterialItem
-                  item={item}
-                  index={index}
-                  isReadOnly={isReadOnly}
-                  onChange={onChange}
-                  // tax={tax}
-                  startDate={date}
-                >
-                  <Button
-                    onClick={() => onRemove(index)}
-                    variant="outlined"
-                    sx={{
-                      position: 'absolute',
-                      color: 'red',
-                      borderColor: 'red',
-                    }}
+            {material
+              .filter((item) => receipt === '' || item.receipt === receipt)
+              .map((item, index) => {
+                if (item.item !== 'tax') sum += item.price;
+                else tax += item.price;
+                return (
+                  <MaterialItem
+                    item={item}
+                    index={item.itemId}
+                    isReadOnly={isReadOnly}
+                    onChange={onChange}
+                    // tax={tax}
+                    startDate={date}
+                    key={item.itemId}
                   >
-                    X
-                  </Button>
-                </MaterialItem>
-              </>
-            ))}
-            <MaterialItem
-              item={newItem}
-              index={material.length}
-              isReadOnly={isReadOnly}
-              onChange={onNewItemChange}
-              // tax={tax}
-              startDate={date}
-            >
-              <Button
-                onClick={onAdd}
-                variant="contained"
-                sx={{ position: 'absolute' }}
+                    <Button
+                      onClick={() => onRemove(item.itemId)}
+                      variant="outlined"
+                      sx={{
+                        position: 'absolute',
+                        color: 'red',
+                        borderColor: 'red',
+                      }}
+                    >
+                      X
+                    </Button>
+                  </MaterialItem>
+                );
+              })}
+            {!isReadOnly && (
+              <MaterialItem
+                item={newItem}
+                index={material.length}
+                isReadOnly={isReadOnly}
+                onChange={onNewItemChange}
+                // tax={tax}
+                startDate={date}
               >
-                Add
-              </Button>
-            </MaterialItem>
+                <Button
+                  onClick={onAdd}
+                  variant="contained"
+                  sx={{ position: 'absolute' }}
+                >
+                  Add
+                </Button>
+              </MaterialItem>
+            )}
             <TableRow>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
+              <TableCell align="center">SubTotal</TableCell>
+              <TableCell align="center">$ {round(sum)}</TableCell>
+              {/* <TableCell align="center">Tax</TableCell>
+              <TableCell align="center">Cost</TableCell> */}
+            </TableRow>
+            <TableRow>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center">Tax</TableCell>
+              <TableCell align="center">$ {round(tax)}</TableCell>
+              {/* <TableCell align="center">Tax</TableCell>
+              <TableCell align="center">Cost</TableCell> */}
+            </TableRow>
+            <TableRow
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">Total</TableCell>
-              <TableCell align="center">$ {totalItemCost}</TableCell>
+              <TableCell align="center">$ {round(tax) + round(sum)}</TableCell>
               {/* <TableCell align="center">Tax</TableCell>
               <TableCell align="center">Cost</TableCell> */}
             </TableRow>

@@ -20,10 +20,14 @@ export const setInvoice = createAsyncThunk(
       const { invoice } = thunkAPI.getState().invoice;
       // const token = thunkAPI.getState().auth.user.token;
       // return await set(id, data, token);
-      return await set(invoice.id, {
+      const material = [...invoice.material];
+      material.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const data = {
         ...invoice,
+        material,
         paid,
-      });
+      };
+      return await set(invoice.id, data);
     } catch (error) {
       const message =
         (error.response &&
@@ -189,6 +193,7 @@ export const invoiceSlice = createSlice({
       .addCase(getInvoice.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        console.log(action.payload);
         state.invoice = action.payload;
       })
       .addCase(getInvoice.rejected, (state, action) => {

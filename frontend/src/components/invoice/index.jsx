@@ -33,6 +33,7 @@ function Invoice() {
   const { invoice, laborPrices, materialPrices, isLoading, isError, message } =
     useSelector((state) => state.invoice);
   const [paid, setPaid] = useState(0);
+  const [isReadOnly, setReadOnly] = useState(false);
 
   useEffect(() => {
     if (isError) {
@@ -62,21 +63,36 @@ function Invoice() {
   }, [dispatch, paid]);
 
   const printInvoice = useCallback(() => {
+    setReadOnly(true);
     setTimeout(() => window.print());
   }, []);
+
+  const onPrintClose = useCallback(() => {
+    setReadOnly(false);
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia) {
+      const mediaQueryList = window.matchMedia('print');
+      mediaQueryList.addListener(function (mql) {
+        if (!mql.matches) {
+          onPrintClose();
+        }
+      });
+    }
+  }, [onPrintClose]);
 
   if (isLoading || !invoice) {
     return <Spinner />;
   }
-  console.log(materialPrices, laborPrices);
   return (
     <div style={{ paddingBottom: '60px' }}>
       <Typography variant="h3">Invoice</Typography>
       <WeekPicker date={date} setDate={setDate} />
-      <Labor date={startDate} />
+      <Labor isReadOnly={isReadOnly} date={startDate} />
       <Divider variant={'fullWidth'} sx={{ margin: '10px 0' }} />
-      <Material date={startDate} />
-      <Divider variant={'fullWidth'} sx={{ margin: '10px 0' }} />
+      <Material isReadOnly={isReadOnly} date={startDate} />
+      <Divider variant={'fullWidth'} sx={{ margin: '20px 0' }} />
       <Typography variant="h5">Invoice Summary</Typography>
       <TableContainer sx={{ border: '2px solid rgba(0,0,0,0.2)' }}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
@@ -87,8 +103,9 @@ function Invoice() {
               <TableCell align="center">Labor Total</TableCell>
               <TableCell align="center">Material Cost</TableCell>
               <TableCell align="center">Material Commission</TableCell>
-              {/* <TableCell align="center">Material Tax</TableCell> */}
+              <TableCell align="center">Material Tax</TableCell>
               <TableCell align="center">Material Total</TableCell>
+              <TableCell align="center">Material & Labor Cost</TableCell>
               <TableCell align="center">Total Comission</TableCell>
               <TableCell align="center">Total Cost</TableCell>
             </TableRow>
@@ -100,13 +117,16 @@ function Invoice() {
               <TableCell align="center">${laborPrices.total}</TableCell>
               <TableCell align="center">${materialPrices.cost}</TableCell>
               <TableCell align="center">${materialPrices.commission}</TableCell>
-              {/* <TableCell align="center">${materialPrices.tax}</TableCell> */}
+              <TableCell align="center">${materialPrices.tax}</TableCell>
               <TableCell align="center">${materialPrices.total}</TableCell>
+              <TableCell align="center">
+                ${materialPrices.cost + laborPrices.cost}
+              </TableCell>
               <TableCell align="center">
                 ${laborPrices.commission + materialPrices.commission}
               </TableCell>
               <TableCell align="center">
-                ${laborPrices.total + materialPrices.total}
+                ${laborPrices.total + materialPrices.total + materialPrices.tax}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -119,15 +139,25 @@ function Invoice() {
           sx={{ display: 'flex', alignItems: 'center' }}
         >
           Paid: $
-          <TextField
-            onChange={(event) => setPaid(+event.target.value)}
-            size="small"
-            type="number"
-            value={paid}
-          ></TextField>
+          {isReadOnly ? (
+            paid
+          ) : (
+            <TextField
+              onChange={(event) => setPaid(+event.target.value)}
+              size="small"
+              type="number"
+              value={paid}
+            ></TextField>
+          )}
         </Typography>
         <Typography variant="subtitle1" align="left">
-          Due: ${round(laborPrices.total + materialPrices.total - paid)}
+          Due: $
+          {round(
+            laborPrices.total +
+              materialPrices.total +
+              materialPrices.tax -
+              paid,
+          )}
         </Typography>
       </Card>
       <Stack

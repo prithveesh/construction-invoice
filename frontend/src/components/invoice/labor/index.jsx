@@ -22,18 +22,15 @@ const Labor = ({ date, isReadOnly = false }) => {
     },
   } = useSelector((state) => state.invoice);
   const dispatch = useDispatch();
-  const noOfWorkers = WEEKDAYS.reduce((sum, _, index) => {
-    return sum + labors[index].noOfWorkers;
-  }, 0);
-  const hoursWorked = WEEKDAYS.reduce(
-    (sum, _, index) => sum + labors[index].hoursWorked,
-    0,
-  );
   const ownerHours = WEEKDAYS.reduce(
     (sum, _, index) => sum + labors[index].ownerHours,
     0,
   );
-  const cost = noOfWorkers * hoursWorked * rates.labor;
+  const cost = WEEKDAYS.reduce((sum, _, index) => {
+    return (
+      sum + labors[index].noOfWorkers * labors[index].hoursWorked * rates.labor
+    );
+  }, 0);
   const commissionTotal = cost * commission;
   const totalCost = commissionTotal + ownerHours * rates.owner + cost;
 
@@ -57,10 +54,10 @@ const Labor = ({ date, isReadOnly = false }) => {
   useEffect(() => {
     dispatch(
       updateLaborPrices({
-        cost: cost,
-        tax: 0,
-        commission: commissionTotal,
-        total: totalCost,
+        cost: round(cost),
+        // tax: totalTax,
+        commission: round(commissionTotal),
+        total: round(totalCost),
       }),
     );
   }, [commissionTotal, cost, dispatch, totalCost]);
@@ -85,10 +82,11 @@ const Labor = ({ date, isReadOnly = false }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {WEEKDAYS.map((_, index) => {
+            {WEEKDAYS.map((day, index) => {
               const labor = labors[index];
               return (
                 <TableRow
+                  key={day}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
@@ -103,6 +101,7 @@ const Labor = ({ date, isReadOnly = false }) => {
                       id={`${index}-noOfWorkers`}
                       value={labor.noOfWorkers}
                       type={'number'}
+                      width="100px"
                     />
                   </TableCell>
                   <TableCell align="center">
@@ -114,6 +113,7 @@ const Labor = ({ date, isReadOnly = false }) => {
                       id={`${index}-hoursWorked`}
                       value={labor.hoursWorked}
                       type={'number'}
+                      width="100px"
                     />
                   </TableCell>
                   <TableCell align="center">
@@ -125,6 +125,7 @@ const Labor = ({ date, isReadOnly = false }) => {
                       id={`${index}-ownerHours`}
                       value={labor.ownerHours}
                       type={'number'}
+                      width="100px"
                     />
                   </TableCell>
                   <TableCell align="center">
@@ -159,8 +160,8 @@ const Labor = ({ date, isReadOnly = false }) => {
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell>Totals</TableCell>
-              <TableCell align="center">{noOfWorkers}</TableCell>
-              <TableCell align="center">{hoursWorked}</TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">{ownerHours}</TableCell>
               <TableCell align="center">$ {cost}</TableCell>
               <TableCell align="center">$ {commissionTotal}</TableCell>

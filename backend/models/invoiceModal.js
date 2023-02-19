@@ -16,6 +16,7 @@ const LaborSchema = mongoose.Schema({
 });
 
 const MaterialSchema = mongoose.Schema({
+  itemId: Number,
   date: String,
   receipt: String,
   storeName: String,

@@ -10,6 +10,7 @@ const Field = ({
   value,
   isReadOnly = false,
   preText = '',
+  width = 'auto',
 }) => {
   if (isReadOnly) {
     return (
@@ -35,12 +36,12 @@ const Field = ({
         size="small"
         type={type}
         align="center"
-        autoComplete={false}
+        autoComplete={'false'}
         {...(value >= 0 || type !== 'number'
           ? { value: value }
           : { value: undefined })}
         sx={{
-          maxWidth: '100px',
+          maxWidth: width,
           '& input': { padding: '3px 10px' },
         }}
       ></TextField>
